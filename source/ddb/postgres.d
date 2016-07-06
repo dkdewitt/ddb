@@ -1113,6 +1113,7 @@ class PGConnection
                     case PGType.INT4: checkParam!int(4); break;
                     case PGType.INT8: checkParam!long(8); break;
                     case PGType.TEXT:
+                    case PGType.BOOLEAN:
                         paramsLen += param.value.coerce!string.length;
                         hasText = true;
                         break;
