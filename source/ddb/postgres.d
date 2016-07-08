@@ -1109,11 +1109,15 @@ class PGConnection
 
                 /*final*/ switch (param.type)
                 {
+                    //Workaround for now with boolean
+                    case PGType.BOOLEAN:
+                        paramsLen += 1;
+                        hasText = true;
+                        break;
                     case PGType.INT2: checkParam!short(2); break;
                     case PGType.INT4: checkParam!int(4); break;
                     case PGType.INT8: checkParam!long(8); break;
                     case PGType.TEXT:
-                    case PGType.BOOLEAN:
                         paramsLen += param.value.coerce!string.length;
                         hasText = true;
                         break;
@@ -1125,6 +1129,8 @@ class PGConnection
                         break;
                     case PGType.DATE:
                         paramsLen += 4; break;
+                    case PGType.TIMESTAMP:
+                        paramsLen += 16; break;
                     default: assert(0, "Not implemented");
                 }
             }
@@ -1160,6 +1166,7 @@ class PGConnection
 
                 switch (param.type)
                 {
+
                     case PGType.INT2:
                         stream.write(cast(int)2);
                         stream.write(param.value.coerce!short);
@@ -1171,6 +1178,12 @@ class PGConnection
                     case PGType.INT8:
                         stream.write(cast(int)8);
                         stream.write(param.value.coerce!long);
+                        break;
+                    case PGType.BOOLEAN:
+                        auto s = param.value.coerce!string[0];
+                        //string s = "t";
+                        stream.write(1);
+                        stream.write(cast(ubyte) s);
                         break;
                     case PGType.TEXT:
                         auto s = param.value.coerce!string;
@@ -1196,6 +1209,11 @@ class PGConnection
                     case PGType.DATE:
                         stream.write(cast(int) 4);
                         stream.write(Date.fromISOString(param.value.coerce!string));
+                        break;
+                    case PGType.TIMESTAMP:
+                        stream.write(cast(int) 16);
+                        auto t =  Clock.currTime(UTC());
+                        stream.write( t);
                         break;
                     default:
 						assert(0, "Not implemented");
