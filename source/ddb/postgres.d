@@ -281,7 +281,7 @@ class PGStream
 
     void write(DateTime x) // timestamp
 	{
-		write(cast(int)((x - PGEpochDateTime).total!"usecs"));
+		write(cast(long)(x - PGEpochDateTime).total!"usecs");
     }
 
     void write(const ref SysTime x) // timestamptz
@@ -1130,7 +1130,7 @@ class PGConnection
                     case PGType.DATE:
                         paramsLen += 4; break;
                     case PGType.TIMESTAMP:
-                        paramsLen += 16; break;
+                        paramsLen += 8; break;
                     default: assert(0, "Not implemented");
                 }
             }
@@ -1211,8 +1211,8 @@ class PGConnection
                         stream.write(Date.fromISOString(param.value.coerce!string));
                         break;
                     case PGType.TIMESTAMP:
-                        stream.write(cast(int) 16);
-                        auto t =  Clock.currTime(UTC());
+                        stream.write(cast(int) 8);
+                        auto t =  cast(DateTime) Clock.currTime(UTC());
                         stream.write( t);
                         break;
                     default:
